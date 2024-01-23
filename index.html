@@ -21,6 +21,44 @@
 <body>
     <canvas id="canvas"></canvas>
     <script>
+        // Varialbes for deltaTime
+        const fixedTimeStep = 0.01;
+        let accumulatedTime = 0;
+        let lastFrameTime = performance.now();
+
+        // Disable right click menu
+        document.addEventListener("contextmenu", function(event) {
+            event.preventDefault();
+            document.querySelector(".wrapper").style.visibility = "disabled";
+        });
+
+        /**********************************************************/
+        // Input
+        let keys = {};
+        let mouse = { x: 0, y: 0, button: '' } // 0 is leftclick, 1 is middleclick, 2 is rightclick
+
+        document.addEventListener('keydown', function(event) {
+            keys[event.key] = true;
+        });
+
+        document.addEventListener('keyup', function(event) {
+            keys[event.key] = false;
+        });
+
+        document.addEventListener('mousedown', function(event) {
+            mouse.button = event.button;
+        });
+
+        document.addEventListener('mouseup', function(event) {
+            mouse.button = '';
+        });
+
+        document.addEventListener('mousemove', function(event) {
+            mouse.x = event.clientX;
+            mouse.y = event.clientY;
+        });
+        /**********************************************************/
+
         document.addEventListener("DOMContentLoaded", function() {
             const canvas = document.getElementById("canvas");
             const ctx = canvas.getContext("2d");
@@ -39,19 +77,64 @@
                 }
             };
 
+            let player = {
+                draw: function(x,y,sX,sY) {
+                    ctx.fillRect(x, y, sX, sY);
+                },
+                // x is like a graph but y starts from the top instead of the bottom sX is size x same for y and they act normal
+                x: 50,
+                y: 50,
+                sX: 100,
+                sY: 100,
+                speed: 1000
+            };
+
             let brb = {
                 Start: function() {
                     console.log("Start");
                     gui.txt("Hello, World!", 10, 50, "48px monospace", "white");
                 },
 
-                Update: function() {
+                engineUpdate: function() {
+                    // deltaTime
+                    const currentTime = performance.now();
+                    const deltaTime = (currentTime - lastFrameTime) / 1000;
+                    accumulatedTime += deltaTime;
+
+                    if(accumulatedTime >= fixedTimeStep) {
+                        brb.Update(fixedTimeStep);
+                        accumulatedTime -= fixedTimeStep;
+                    }
+                },
+
+                Update: function(deltaTime) {
                     console.log("Update");
+
+                    // Input handling
+                    if(keys["w"]) {
+                        player.y -= player.speed*deltaTime;
+                    }
+                    if(keys["s"]) {
+                        player.y += player.speed*deltaTime;
+                    }
+                    if(keys["a"]) {
+                        player.x -= player.speed*deltaTime;
+                    }
+                    if(keys["d"]) {
+                        player.x += player.speed*deltaTime;
+                    }
+
+                    // Clear canvas
+                    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+                    // Draw
+                    player.draw(player.x,player.y,player.sX,player.sY);
                     gui.txt("Hello, World!", 10, 50, "48px monospace", "white");
                 }
             };
 
-            setInterval(brb.Update, 10); // Every 10ms a frame so 100fps
+            brb.Start();
+            setInterval(brb.engineUpdate, 10); // Every 10ms a frame so 100fps
         });
     </script>
 </body>
