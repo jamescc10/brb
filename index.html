@@ -128,8 +128,9 @@
                     ctx.clearRect(0,0,canvas.width,canvas.height);
 
                     // Draw
+                    gui.txt("Hello, World!", 10, 50, "48px monospace", "red");
+                    ctx.fillStyle = "white";
                     player.draw(player.x,player.y,player.sX,player.sY);
-                    gui.txt("Hello, World!", 10, 50, "48px monospace", "white");
                 }
             };
 
