@@ -21,13 +21,32 @@
 <body>
     <canvas id="canvas"></canvas>
     <script>
+        // Engine Variables
+        let scenes = ['title', 'scene 1'];
+        let currentScene = scenes[0];
+        let isGuiLoaded = false;
+
+        // Image Variables
+        const playerImg = new Image();
+        playerImg.src = "player.png";
+
+        // Variables for canvas
+        let canvas = document.getElementById("canvas");
+        let ctx = canvas.getContext("2d");
+
+        // Increase pixel ratio for better resolution
+         const pixelRatio = window.devicePixelRatio || 1;
+        canvas.width = window.innerWidth * pixelRatio;
+        canvas.height = window.innerHeight * pixelRatio;
+        ctx.scale(pixelRatio, pixelRatio);
+
         // Varialbes for deltaTime
         const fixedTimeStep = 0.01;
         let accumulatedTime = 0;
         let lastFrameTime = performance.now();
 
         // Disable right click menu
-        document.addEventListener("contextmenu", function(event) {
+        document.addEventListener("contextmenu", function (event) {
             event.preventDefault();
             document.querySelector(".wrapper").style.visibility = "disabled";
         });
@@ -37,102 +56,135 @@
         let keys = {};
         let mouse = { x: 0, y: 0, button: '' } // 0 is leftclick, 1 is middleclick, 2 is rightclick
 
-        document.addEventListener('keydown', function(event) {
+        document.addEventListener('keydown', function (event) {
             keys[event.key] = true;
         });
 
-        document.addEventListener('keyup', function(event) {
+        document.addEventListener('keyup', function (event) {
             keys[event.key] = false;
         });
 
-        document.addEventListener('mousedown', function(event) {
+        document.addEventListener('mousedown', function (event) {
             mouse.button = event.button;
         });
 
-        document.addEventListener('mouseup', function(event) {
+        document.addEventListener('mouseup', function (event) {
             mouse.button = '';
         });
 
-        document.addEventListener('mousemove', function(event) {
+        document.addEventListener('mousemove', function (event) {
             mouse.x = event.clientX;
             mouse.y = event.clientY;
         });
         /**********************************************************/
 
+        let gui = {
+            txt: function(str, x, y, font, color, size) {
+                const txt = document.createElement('div');
+                txt.style.position = 'absolute';
+                txt.innerText = str;
+                txt.style.fontFamily = font;
+                txt.style.fontSize = size;
+                txt.style.color = color;
+                txt.style.cursor = 'default';
+                txt.style.userSelect = 'none';
+                txt.style.marginTop = `${y}px`;
+                txt.style.marginLeft = `${x}px`;
+                document.body.append(txt);
+            },
+
+            txtClick: function(str, x, y, font, color, size, code) {
+                const txt = document.createElement('div');
+                txt.style.position = 'absolute';
+                txt.innerHTML = `<div onclick="${code}">${str}</div>`;
+                txt.style.fontFamily = font;
+                txt.style.fontSize = size;
+                txt.style.color = color;
+                txt.style.cursor = 'pointer';
+                txt.style.userSelect = 'none';
+                txt.style.marginTop = `${y}px`;
+                txt.style.marginLeft = `${x}px`;
+                document.body.append(txt);
+            },
+
+            clear: function() {
+                document.querySelectorAll('div').forEach(function (span) {
+                    span.remove();
+                });
+                isGuiLoaded = false;
+            }
+        };
+
+        let player = {
+            draw: function(x, y, sX, sY) {
+                ctx.drawImage(playerImg, x, y, sX, sY);
+            },
+            // x is like a graph but y starts from the top instead of the bottom sX is size x same for y and they act normal
+            x: 50,
+            y: 50,
+            sX: 100,
+            sY: 100,
+            speed: 1000
+        };
+
+        let brb = {
+            Start: function() {
+                console.log("Start");
+            },
+
+            engineUpdate: function() {
+                // deltaTime
+                const currentTime = performance.now();
+                const deltaTime = (currentTime - lastFrameTime) / 1000;
+                accumulatedTime += deltaTime;
+
+                // Update
+                if(accumulatedTime >= fixedTimeStep) {
+                    brb.Update(fixedTimeStep);
+                    accumulatedTime -= fixedTimeStep;
+                }
+            },
+
+            Update: function(deltaTime) {
+                console.log("Update");
+
+                // Input handling
+                if(keys["w"]) {
+                    player.y -= player.speed * deltaTime;
+                }
+                if(keys["s"]) {
+                    player.y += player.speed * deltaTime;
+                }
+                if(keys["a"]) {
+                    player.x -= player.speed * deltaTime;
+                }
+                if(keys["d"]) {
+                    player.x += player.speed * deltaTime;
+                }
+
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Draw
+                if(currentScene == scenes[0]) {
+                    if(!isGuiLoaded) {
+                        gui.txt("Title screen", '10', '50', "monospace", "red", '48px');
+                        gui.txtClick("scene 1", '10', '100', "monospace", "red", '48px', 'currentScene=scenes[1];gui.clear();');
+                        isGuiLoaded = true;
+                    }
+                } else if(currentScene == scenes[1]) {
+                    if(!isGuiLoaded) {
+                        gui.txt("Hello, World!", '10', '50', "monospace", "red", '48px');
+                        isGuiLoaded = true;
+                    }
+                    player.draw(player.x, player.y, player.sX, player.sY);
+                }
+            }
+        };
+
         document.addEventListener("DOMContentLoaded", function() {
-            const canvas = document.getElementById("canvas");
-            const ctx = canvas.getContext("2d");
-
-            // Increase pixel ratio for better resolution
-            const pixelRatio = window.devicePixelRatio || 1;
-            canvas.width = window.innerWidth * pixelRatio;
-            canvas.height = window.innerHeight * pixelRatio;
-            ctx.scale(pixelRatio, pixelRatio);
-
-            let gui = {
-                txt: function(str, x, y, font, color) {
-                    ctx.fillStyle = color;
-                    ctx.font = font;
-                    ctx.fillText(str, x, y);
-                }
-            };
-
-            let player = {
-                draw: function(x,y,sX,sY) {
-                    ctx.fillRect(x, y, sX, sY);
-                },
-                // x is like a graph but y starts from the top instead of the bottom sX is size x same for y and they act normal
-                x: 50,
-                y: 50,
-                sX: 100,
-                sY: 100,
-                speed: 1000
-            };
-
-            let brb = {
-                Start: function() {
-                    console.log("Start");
-                    gui.txt("Hello, World!", 10, 50, "48px monospace", "white");
-                },
-
-                engineUpdate: function() {
-                    // deltaTime
-                    const currentTime = performance.now();
-                    const deltaTime = (currentTime - lastFrameTime) / 1000;
-                    accumulatedTime += deltaTime;
-
-                    if(accumulatedTime >= fixedTimeStep) {
-                        brb.Update(fixedTimeStep);
-                        accumulatedTime -= fixedTimeStep;
-                    }
-                },
-
-                Update: function(deltaTime) {
-                    console.log("Update");
-
-                    // Input handling
-                    if(keys["w"]) {
-                        player.y -= player.speed*deltaTime;
-                    }
-                    if(keys["s"]) {
-                        player.y += player.speed*deltaTime;
-                    }
-                    if(keys["a"]) {
-                        player.x -= player.speed*deltaTime;
-                    }
-                    if(keys["d"]) {
-                        player.x += player.speed*deltaTime;
-                    }
-
-                    // Clear canvas
-                    ctx.clearRect(0,0,canvas.width,canvas.height);
-
-                    // Draw
-                    gui.txt("Hello, World!", 10, 50, "48px monospace", "red");
-                    ctx.fillStyle = "white";
-                    player.draw(player.x,player.y,player.sX,player.sY);
-                }
-            };
+            canvas = document.getElementById("canvas");
+            ctx = canvas.getContext("2d");
 
             brb.Start();
             setInterval(brb.engineUpdate, 10); // Every 10ms a frame so 100fps
