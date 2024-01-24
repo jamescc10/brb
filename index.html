@@ -13,6 +13,8 @@
 
         canvas {
             position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
         }
@@ -78,32 +80,21 @@
         });
         /**********************************************************/
 
+        // Functions
+        function clamp(number, min, max) {
+            return Math.max(min, Math.min(number, max));
+        }
+
         let gui = {
-            txt: function(str, x, y, font, color, size) {
+            txt: function(str, css) {
                 const txt = document.createElement('div');
-                txt.style.position = 'absolute';
-                txt.innerText = str;
-                txt.style.fontFamily = font;
-                txt.style.fontSize = size;
-                txt.style.color = color;
-                txt.style.cursor = 'default';
-                txt.style.userSelect = 'none';
-                txt.style.marginTop = `${y}px`;
-                txt.style.marginLeft = `${x}px`;
+                txt.innerHTML = `<div style="${css}">${str}</div>`;
                 document.body.append(txt);
             },
 
-            txtClick: function(str, x, y, font, color, size, code) {
+            txtClick: function(str, css, code) {
                 const txt = document.createElement('div');
-                txt.style.position = 'absolute';
-                txt.innerHTML = `<div onclick="${code}">${str}</div>`;
-                txt.style.fontFamily = font;
-                txt.style.fontSize = size;
-                txt.style.color = color;
-                txt.style.cursor = 'pointer';
-                txt.style.userSelect = 'none';
-                txt.style.marginTop = `${y}px`;
-                txt.style.marginLeft = `${x}px`;
+                txt.innerHTML = `<div style="${css}" onclick="${code}">${str}</div>`;
                 document.body.append(txt);
             },
 
@@ -162,19 +153,23 @@
                     player.x += player.speed * deltaTime;
                 }
 
+                // Limit player movement
+                player.x = clamp(player.x, 0, canvas.width - 100); // -100 for some reason idk
+                player.y = clamp(player.y, 0, canvas.height - 100);
+
                 // Clear canvas
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
                 // Draw
                 if(currentScene == scenes[0]) {
                     if(!isGuiLoaded) {
-                        gui.txt("Title screen", '10', '50', "monospace", "red", '48px');
-                        gui.txtClick("scene 1", '10', '100', "monospace", "red", '48px', 'currentScene=scenes[1];gui.clear();');
+                        gui.txt('Title screen', 'text-align: center; color: red; font-size: 48px; font-family: monospace;');
+                        gui.txtClick('scene 1', 'cursor: pointer; color: red; font-size: 48px; font-family: monospace; position: absolute; margin-left: 50%; transform: translate(-50%, 0%);', 'currentScene=scenes[1];gui.clear();');
                         isGuiLoaded = true;
                     }
                 } else if(currentScene == scenes[1]) {
                     if(!isGuiLoaded) {
-                        gui.txt("Hello, World!", '10', '50', "monospace", "red", '48px');
+                        gui.txt("WASD to move", 'cursor: pointer; color: red; font-size: 48px; font-family: monospace; position: absolute; margin-left: 50%; transform: translate(-50%, 0%);');
                         isGuiLoaded = true;
                     }
                     player.draw(player.x, player.y, player.sX, player.sY);
