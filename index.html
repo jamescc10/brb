@@ -165,13 +165,13 @@
                 // }
 
                 // Input handling
-                if(keys["w"]) {
+                if(keys["w"] || keys["ArrowUp"]) {
                     player.y -= player.speed * deltaTime;
                     if(brb.collisionCheck(player,cube)) {
                         player.y += player.speed * deltaTime;
                     }
                 }
-                if(keys["s"]) {
+                if(keys["s"] || keys["ArrowDown"]) {
                     player.y += player.speed * deltaTime;
                     if(brb.collisionCheck(player,cube)) {
                         player.y -= player.speed * deltaTime;
