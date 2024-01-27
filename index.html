@@ -118,7 +118,26 @@
             speed: 1000
         };
 
+        let cube = {
+            draw: function(x,y,sX,sY) {
+                ctx.fillRect(x, y, sX, sY);
+            },
+            x: 0,
+            y: 500,
+            sX: 1000,
+            sY: 100
+        };
+
         let brb = {
+            collisionCheck: function(a,b) {
+                return (
+                    a.x < b.x + b.sX &&
+                    a.x + a.sX > b.x &&
+                    a.y < b.y + b.sY &&
+                    a.y + a.sY > b.y
+                );
+            },
+
             Start: function() {
                 console.log("Start");
             },
@@ -139,23 +158,41 @@
             Update: function(deltaTime) {
                 console.log("Update");
 
+                // Gravity
+                // player.y += 400*deltaTime;
+                // if(brb.collisionCheck(player,cube)) {
+                //     player.y -= 400*deltaTime;
+                // }
+
                 // Input handling
                 if(keys["w"]) {
                     player.y -= player.speed * deltaTime;
+                    if(brb.collisionCheck(player,cube)) {
+                        player.y += player.speed * deltaTime;
+                    }
                 }
                 if(keys["s"]) {
                     player.y += player.speed * deltaTime;
+                    if(brb.collisionCheck(player,cube)) {
+                        player.y -= player.speed * deltaTime;
+                    }
                 }
-                if(keys["a"]) {
+                if(keys["a"] || keys["ArrowLeft"]) {
                     player.x -= player.speed * deltaTime;
+                    if(brb.collisionCheck(player,cube)) {
+                        player.x += player.speed * deltaTime;
+                    }
                 }
-                if(keys["d"]) {
+                if(keys["d"] || keys["ArrowRight"]) {
                     player.x += player.speed * deltaTime;
+                    if(brb.collisionCheck(player,cube)) {
+                        player.x -= player.speed * deltaTime;
+                    }
                 }
 
                 // Limit player movement
-                player.x = clamp(player.x, 0, canvas.width - 100); // -100 for some reason idk
-                player.y = clamp(player.y, 0, canvas.height - 100);
+                player.x = clamp(player.x, 0, canvas.width - player.sX);
+                player.y = clamp(player.y, 0, canvas.height - player.sY);
 
                 // Clear canvas
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -173,6 +210,8 @@
                         isGuiLoaded = true;
                     }
                     player.draw(player.x, player.y, player.sX, player.sY);
+                    ctx.fillStyle = 'blue';
+                    cube.draw(cube.x, cube.y, cube.sX, cube.sY);
                 }
             }
         };
