@@ -128,6 +128,18 @@
             sY: 100
         };
 
+        let cube1 = {
+            draw: function(x,y,sX,sY) {
+                ctx.fillRect(x, y, sX, sY);
+            },
+            x: 1200,
+            y: 500,
+            sX: 1000,
+            sY: 100
+        };
+
+        let scene1 = [cube,cube1];
+
         let brb = {
             collisionCheck: function(a,b) {
                 return (
@@ -167,26 +179,34 @@
                 // Input handling
                 if(keys["w"] || keys["ArrowUp"]) {
                     player.y -= player.speed * deltaTime;
-                    if(brb.collisionCheck(player,cube)) {
-                        player.y += player.speed * deltaTime;
+                    if(brb.collisionCheck(player,cube)||brb.collisionCheck(player,cube1)) {
+                        while(brb.collisionCheck(player,cube)||brb.collisionCheck(player,cube1)) {
+                            player.y += 1;
+                        }
                     }
                 }
                 if(keys["s"] || keys["ArrowDown"]) {
                     player.y += player.speed * deltaTime;
-                    if(brb.collisionCheck(player,cube)) {
-                        player.y -= player.speed * deltaTime;
+                    if(brb.collisionCheck(player,cube)||brb.collisionCheck(player,cube1)) {
+                        while(brb.collisionCheck(player,cube)||brb.collisionCheck(player,cube1)) {
+                            player.y -= 1;
+                        }
                     }
                 }
                 if(keys["a"] || keys["ArrowLeft"]) {
                     player.x -= player.speed * deltaTime;
-                    if(brb.collisionCheck(player,cube)) {
-                        player.x += player.speed * deltaTime;
+                    if(brb.collisionCheck(player,cube)||brb.collisionCheck(player,cube1)) {
+                        while(brb.collisionCheck(player,cube)||brb.collisionCheck(player,cube1)) {
+                            player.x += 1;
+                        }
                     }
                 }
                 if(keys["d"] || keys["ArrowRight"]) {
                     player.x += player.speed * deltaTime;
-                    if(brb.collisionCheck(player,cube)) {
-                        player.x -= player.speed * deltaTime;
+                    if(brb.collisionCheck(player,cube)||brb.collisionCheck(player,cube1)) {
+                        while(brb.collisionCheck(player,cube)||brb.collisionCheck(player,cube1)) {
+                            player.x -= 1;
+                        }
                     }
                 }
 
@@ -211,7 +231,9 @@
                     }
                     player.draw(player.x, player.y, player.sX, player.sY);
                     ctx.fillStyle = 'blue';
-                    cube.draw(cube.x, cube.y, cube.sX, cube.sY);
+                    for(let i = 0; i < scene1.length; ++i) {
+                        scene1[i].draw(scene1[i].x,scene1[i].y,scene1[i].sX,scene1[i].sY);
+                    }
                 }
             }
         };
